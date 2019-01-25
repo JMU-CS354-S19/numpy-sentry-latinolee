@@ -35,8 +35,8 @@ class SentryNode(object):
                          Image, self.depth_callback, queue_size=1)
         self.sound_publish = rospy.Publisher('/mobile_base/commands/sound', Sound, queue_size=1)
         self.prev = None
-        self.average = 0
-        self.threshold = 15  
+        self.average = 1
+        self.threshold = 1.5  
         self.intruder = False  
 
 
@@ -64,10 +64,11 @@ class SentryNode(object):
         
         
         
-        self.average = self.average * .5 + d * (1 - .5)
+        self.average = self.average * .9 + d * (1 - .9)
         
         self.prev = current
-        if(self.average > self.threshold):
+        
+        if((d / self.average) > self.threshold):
             
             self.intruder = True
         
@@ -77,7 +78,7 @@ class SentryNode(object):
             beep = Sound()
             
             if(self.intruder):
-                print self.average
+                rospy.loginfo( "Intruder Alert!")
                 beep.value = 0
                 self.sound_publish.publish(beep)
                 self.intruder = False
